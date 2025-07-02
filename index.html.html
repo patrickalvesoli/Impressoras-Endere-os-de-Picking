@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=, initial-scale=1.0">
+<title>IMPRESSÃO DE ENDEREÇOS</title>
+<style>
+    body {
+        background-color: #002146; /* Azul escuro */
+        font-family: Arial, Helvetica, sans-serif;
+        color: #000;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .fundo {
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 30px;
+        border-radius: 20px;
+        color: #fff;
+        border: 2px solid #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 345px;
+        position: relative;
+    }
+    .tabs {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 18px;
+        width: 100%;
+    }
+    .tab-btn {
+        flex:1;
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #ffe;
+        font-size: 17px;
+        font-weight: bold;
+        padding: 8px 0 11px 0;
+        cursor: pointer;
+        transition: 0.2s border-bottom;
+    }
+    .tab-btn.active {
+        border-bottom: 3px solid #FFD600;
+        color: #FEDC00;
+    }
+    .tab-content {
+        display: none;
+        width: 100%;
+    }
+    .tab-content.active {
+        display: block;
+        width: 100%;
+    }
+    button, .amarelo, .btn-amarelo {
+        font-family: inherit;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 2px solid #fff;
+        cursor: pointer;
+        transition: 0.25s;
+    }
+    #enviar, .btn-amarelo {
+        background-color: #FFD600;
+        color: #53390e;
+        display: block;
+        margin: 22px auto 18px auto;
+        padding: 18px 0;
+        width: 95%;
+        max-width: 260px;
+        text-align: center;
+        border: 2px solid #ffef9b;
+        box-shadow: 0 2px 13px #0001;
+        letter-spacing: 1px;
+        outline: none;
+        font-size: 21px;
+    }
+    #enviar:disabled {
+        background-color: #FFE082;
+        color: #bba93c;
+        cursor: not-allowed;
+        border: 2px solid #ddd7a2;
+    }
+    #enviar:hover:not(:disabled), .btn-amarelo:hover:not(:disabled) {
+        background-color: #fff49a;
+        color: #4d4200;
+    }
+    #ajudaBtn {
+        position:fixed;
+        right:24px;
+        top:24px;
+        background: #d60030;
+        color: #fff;
+        border:2px solid #fff;
+        font-size: 21px;
+        font-weight: bold;
+        padding: 16px 40px;
+        border-radius: 14px;
+        z-index:100;
+        box-shadow:1px 1px 14px #0005;
+        transition: 0.18s;
+        letter-spacing:1px;
+    }
+    #ajudaBtn:hover {
+        background: #a90122;
+        color:#fffbe9;
+        border-color: #fffbe9;
+    }
+    input, select {
+        height: 40px;
+        width: 100%;
+        margin: 5px 0;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+    .footer {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        user-select: none;
+        color: #003366;
+        font-size: 16px;
+    }
+    #contador {
+        color: #ffe;
+        background: #252525;
+        font-weight: bold;
+        padding: 6px;
+        border-radius: 7px;
+        margin-top: 8px;
+        margin-bottom: 2px;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+    }
+    #limite {
+        color: #FFFF00;
+        background: #A00;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-bottom: 0;
+        display: none;
+        text-align: center;
+        width: 100%;
+    }
+    #historico {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid #FFF;
+        margin-top: 5px;
+        border-radius: 8px;
+        width: 100%;
+        color: #FFEB3B;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 15px;
+        padding: 8px;
+        text-align: left;
+    }
+    #historico h2 {
+        color: #FFF;
+        font-size: 17px;
+        margin-top: 2px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+    #historico ul {
+        padding-left: 14px;
+        margin: 0;
+    }
+    #historico li {
+        color: #FFEB3B;
+        margin-bottom: 2px;
+    }
+    #pesquisaBox {
+        margin-bottom: 14px;
+    }
+</style>
+</head>
+<body>
+<!-- BOTÃO DE AJUDA FORA do quadro de impressão -->
+<button id="ajudaBtn">
+    Ajuda
+</button>
+
+<div class="fundo">
+    <!-- Abas -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tab1btn" onclick="showTab('imp')">Impressão</button>
+        <button class="tab-btn" id="tab2btn" onclick="showTab('hist')">Histórico</button>
+    </div>
+    <!-- Impressão -->
+    <div class="tab-content active" id="tab-imp">
+        <label for="ip_addr">IP Impressora:</label>
+        <input type="text" class="input" id="ip_addr" placeholder="IP" value="" aria-label="IP Impressora" autocomplete="off">
+        <label for="tote">DIGITE O ENDEREÇO:</label>
+        <input type="text" class="input" id="tote" placeholder="MZ-1-002-003-04-05" aria-label="TOTE" maxlength="18">
+        <button id="enviar">Imprimir</button>
+        <div id="output"></div>
+        <div id="contador">Impressões realizadas: 0 / 5</div>
+        <div id="limite">LIMITE ATINGIDO! Atualize a página para liberar novas impressões.</div>
+    </div>
+    <!-- Histórico -->
+    <div class="tab-content" id="tab-hist">
+        <h2>Histórico de Impressões</h2>
+        <div id="pesquisaBox">
+            <input type="text" id="pesquisaInput" placeholder="Pesquisar endereço..." />
+            <button class="btn-amarelo" onclick="pesquisarHistorico()">Buscar</button>
+        </div>
+        <div id="historico">
+            <ul id="lista_historico"><li>Nenhuma impressão ainda.</li></ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Ajuda -->
+<div id="ajudaModal" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:99;background:rgba(0,0,0,0.63);justify-content:center;align-items:center;">
+    <div style="background:#FFE;width:370px;max-width:90vw;border-radius:18px;padding:26px 22px 18px 22px;box-shadow:0 10px 35px #2227;position:relative;color:#333;">
+        <button onclick="fecharAjuda()" style="position:absolute;top:14px;right:12px;border:none;font-size:19px;background:transparent;cursor:pointer;color:#b11;font-weight:bold;">&times;</button>
+        <h2 style="color:#222;font-size:21px;margin-top:2px;">Ajuda & Instruções</h2>
+        <ul style="margin-bottom:14px;font-size:16px;line-height:1.47;">
+            <li>Digite corretamente o <b>IP da impressora</b> e o <b>endereço</b>.</li>
+            <li>A cada 5 impressões, a tela será bloqueada e será necessário atualizar a página para continuar.</li>
+            <li>Consulte o Histórico pela aba para buscas rápidas.</li>
+        </ul>
+        <b style="color:#b56c00;">Problemas na impressora?</b>
+        <div style="background:#ffd86d77;padding:14px;border-radius:8px;color:#523501;margin:10px 0 0 0;font-size:15.5px;">
+            1. Procure a <b>equipe de IS</b> (<i>responsável pelo conserto das impressoras</i>).<br>
+            2. Ou comunique seu <b>gestor</b> para que ele abra um chamado para tratativa do problema.
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>Desenvolvido por Patrick Alves de Oliveira Maciel</p>
+</div>
+<script>
+    // Troca de abas
+    function showTab(tab) {
+        document.getElementById("tab1btn").classList.toggle("active", tab==='imp');
+        document.getElementById("tab2btn").classList.toggle("active", tab==='hist');
+        document.getElementById("tab-imp").classList.toggle("active", tab==='imp');
+        document.getElementById("tab-hist").classList.toggle("active", tab==='hist');
+        setTimeout(function(){
+            if(tab==='imp') document.getElementById('tote').focus();
+            if(tab==='hist') document.getElementById('pesquisaInput').focus();
+        },100);
+    }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const MAX_IMPRESSOES = 5;
+    let etiquetaCounter = 0;
+    let historicoArray = [];
+
+    const contadorElem = document.getElementById("contador");
+    const historicoElem = document.getElementById("lista_historico");
+    const limiteElem = document.getElementById("limite");
+    const toteInput = document.getElementById("tote");
+    const btnImprimir = document.getElementById("enviar");
+    const ipInput = document.getElementById("ip_addr");
+    const outputElem = document.getElementById("output");
+
+    // foco ao carregar
+    setTimeout(()=>toteInput.focus(),100);
+
+    function atualizarContador() {
+        contadorElem.textContent = `Impressões realizadas: ${etiquetaCounter} / ${MAX_IMPRESSOES}`;
+    }
+
+    function renderHistorico(arr) {
+        if(!arr || arr.length === 0){
+            historicoElem.innerHTML = "<li>Nenhuma impressão ainda.</li>";
+        } else {
+            historicoElem.innerHTML = "";
+            for(let i=arr.length-1; i>=0; i--) {
+                historicoElem.innerHTML += `<li><b>${arr[i].tote}</b>
+                 <span style="font-size:12px;">&mdash; ${arr[i].time}</span></li>`;
+            }
+        }
+    }
+
+    function atualizarHistorico() {
+        renderHistorico(historicoArray);
+    }
+
+    function bloquearImpressao() {
+        btnImprimir.disabled = true;
+        toteInput.disabled = true;
+        ipInput.disabled = true;
+        limiteElem.style.display = "block";
+        toteInput.blur();
+    }
+
+    toteInput.addEventListener("input", function(e) {
+        let v = this.value.replace(/\D/g, "");
+        let letras = "";
+        if(this.value.length > 0){
+            letras = this.value.replace(/[^A-Za-z]/g, "").substring(0,2).toUpperCase();
+        }
+        let result = "";
+        if (letras.length === 2) {
+            result = letras + "-";
+        } else {
+            result = letras;
+        }
+        if (v.length > 0)   result += v.substring(0,1) + (v.length>=1?"-":"");
+        if (v.length > 1)   result += v.substring(1,4) + (v.length>=4?"-":"");
+        if (v.length > 4)   result += v.substring(4,7) + (v.length>=7?"-":"");
+        if (v.length > 7)   result += v.substring(7,9) + (v.length>=9?"-":"");
+        if (v.length > 9)   result += v.substring(9,11) ;
+        this.value = result;
+        outputElem.innerHTML = "";
+    });
+
+    btnImprimir.addEventListener("click", sendPrint);
+
+    function sendPrint() {
+        if (etiquetaCounter >= MAX_IMPRESSOES) {
+            bloquearImpressao();
+            return;
+        }
+
+        const toteValue = toteInput.value.trim().toUpperCase();
+        if (!toteValue) {
+            outputElem.innerHTML = 'Digite o Endereço Correto!';
+            return;
+        }
+        const ip = ipInput.value;
+        const ipPattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){2}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (!ipPattern.test(ip)) {
+            outputElem.innerHTML = 'Erro: IP inválido.';
+            return;
+        }
+
+        etiquetaCounter++;
+        let now = new Date();
+        let timeStr = now.toLocaleTimeString();
+        historicoArray.push({tote: toteValue, time: timeStr});
+        if (historicoArray.length > 20) historicoArray.shift();
+
+        atualizarContador();
+        atualizarHistorico();
+
+        outputElem.innerHTML = "Enviando...";
+
+        const code = buildZPLCode(toteValue);
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            outputElem.innerHTML = `Status: ${xhr.status}<br>${xhr.responseText}`;
+            if (etiquetaCounter >= MAX_IMPRESSOES) {
+                setTimeout(() => bloquearImpressao(), 600);
+            }
+        };
+        xhr.onerror = function() {
+            outputElem.innerHTML = 'Erro ao enviar a solicitação.';
+            if (etiquetaCounter >= MAX_IMPRESSOES) {
+                setTimeout(() => bloquearImpressao(), 600);
+            }
+        };
+        xhr.open("POST", `http://${ip}:9100/pstprnt`, true);
+        xhr.setRequestHeader("Content-Length", code.length);
+        xhr.send(code);
+
+        toteInput.value = "";
+    }
+
+    function buildZPLCode(toteValue) {
+        toteValue = toteValue.toUpperCase();
+        const parts = toteValue.split("-");
+        const rua   = typeof parts[2] !== "undefined" ? parts[2] : "";
+        const nivel = typeof parts[4] !== "undefined" ? parts[4] : "";
+        const apto  = typeof parts[5] !== "undefined" ? parts[5] : "";
+        const campoGrande = typeof parts[3] !== "undefined" ? parts[3] : "";
+
+        return `^XA
+^PW815
+^CF0,20
+
+^FO90,5^GB160,110,100,B^FS
+^FO135,15^FR^A0N,28,28^FD RUA ^FS
+^FO115,45^FR^A0N,80,80^FD${rua}^FS
+
+^FO395,5^GB120,110,100,B^FS
+^FO410,15^FR^A0N,28,28^FD NIVEL ^FS
+^FO410,45^FR^A0N,80,80^FD${nivel}^FS
+
+^FO230,130^A0N,40,40^FDPREDIO ^FS
+^FO291,120^GD12,0,4,B,45^FS
+
+^CF0,80
+
+^FO660,5^GB130,110,100,B^FS
+^FO685,15^FR^A0N,28,28^FD APTO ^FS
+^FO685,45^FR^A0N,80,80^FD${apto}^FS
+
+^FO10,172^A0N,265,260^FB600,1,0,C,60^FD${campoGrande}^FS
+^FT490,380^A0N,26,26^FD${toteValue}^FS
+^FT554,355^BXN,13,200,0,0,1,~^FH^FD${toteValue}^FS
+^PQ1,0,1,Y
+^XZ`;
+    }
+
+    window.pesquisarHistorico = function() {
+        const termo = document.getElementById('pesquisaInput').value.trim().toUpperCase();
+        let filtrados;
+        if (!termo) {
+            renderHistorico(historicoArray);
+            return;
+        }
+        filtrados = historicoArray.filter(obj => obj.tote.toUpperCase().includes(termo));
+        renderHistorico(filtrados);
+    }
+
+    atualizarContador();
+    atualizarHistorico();
+
+    document.getElementById('ajudaBtn').onclick = function(){
+        document.getElementById('ajudaModal').style.display = 'flex';
+    };
+    window.fecharAjuda = function(){
+        document.getElementById('ajudaModal').style.display = 'none';
+    };
+    document.getElementById('ajudaModal').addEventListener('click',function(e){
+        if(e.target===this) fecharAjuda();
+    });
+});
+</script>
+</body>
+</html>
